@@ -4,6 +4,7 @@ import java.awt.*;
 
 import javax.swing.*;
 
+@SuppressWarnings("serial")
 public class TextPanel extends JPanel {
 	private JTextArea textArea;
 	

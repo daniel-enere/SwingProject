@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+@SuppressWarnings("serial")
 public class Toolbar extends JPanel implements ActionListener {
 	private JButton someButton;
 	private JButton anotherButton;
