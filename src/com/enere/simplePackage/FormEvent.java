@@ -74,7 +74,7 @@ public class FormEvent extends EventObject {
 		return ageCategory;
 	}
 	
-	public String getEmpCat () {
+	public String getEmpType () {
 		return empType;
 	}
 

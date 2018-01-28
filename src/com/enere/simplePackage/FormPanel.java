@@ -271,6 +271,13 @@ public class FormPanel extends JPanel {
 	void setFormListener(FormListener formPanelEvent) {
 		this.formListener = formPanelEvent;
 	}
+	
+	void resetValues() {
+		firstNameField.setText(null);
+		lastNameField.setText(null);
+		taxField.setText(null);
+		
+	}
 }
 
 class AgeCategory {

@@ -2,7 +2,11 @@ package com.enere.simplePackage;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
+
 import javax.swing.*;
+
+import controller.Controller;
 
 public class MainFrame extends JFrame {
 	/**
@@ -13,6 +17,8 @@ public class MainFrame extends JFrame {
 	private Toolbar toolbar;
 	private FormPanel formPanel;
 	private JFileChooser fileChooser;
+	private Controller controller;
+	private EmployeeTablePanel empTablePanel;
 	// private MainMenuBar menuBar; will implement at a later date
 
 	public MainFrame() {
@@ -24,9 +30,19 @@ public class MainFrame extends JFrame {
 		toolbar = new Toolbar();
 		formPanel = new FormPanel();
 		fileChooser = new JFileChooser();
+		empTablePanel = new EmployeeTablePanel();
 		// menuBar = new MainMenuBar();
+
+		controller = new Controller();
+		empTablePanel.setData(controller.getEmployees());
 		
-		//fileChooser setup
+		empTablePanel.setEmployeeTableListener(new EmployeeTableListener() {
+			public void rowDeleted(int row) {
+				controller.removeEmployee(row);
+			}
+		});
+
+		// fileChooser setup
 		fileChooser.addChoosableFileFilter(new EmployeeFileFilter());
 
 		setJMenuBar(createMenuBar());
@@ -41,22 +57,27 @@ public class MainFrame extends JFrame {
 
 		formPanel.setFormListener(new FormListener() {
 			public void formEventOccurrence(FormEvent event) {
-				String firstName = event.getFirstName();
-				String lastName = event.getLastName();
-				int ageCat = event.getAgeCategory();
-				String empType = event.getEmpCat();
-				String gender = event.getGender();
-
-				textPanel.appendText(lastName + ", " + firstName + "\n" + "Age Group: " + ageCat + "\n" + empType + "\n"
-						+ gender + "\n\n");
+				controller.addEmployee(event);
+				empTablePanel.refresh();
+				formPanel.resetValues();
+				// String firstName = event.getFirstName();
+				// String lastName = event.getLastName();
+				// int ageCat = event.getAgeCategory();
+				// String empType = event.getEmpCat();
+				// String gender = event.getGender();
+				//
+				// textPanel.appendText(lastName + ", " + firstName + "\n" + "Age Group: " +
+				// ageCat + "\n" + empType + "\n"
+				// + gender + "\n\n");
 
 			}
 		});
 
 		add(toolbar, BorderLayout.NORTH);
-		add(textPanel, BorderLayout.CENTER);
+		// add(textPanel, BorderLayout.CENTER); /* fix later*/
 		add(formPanel, BorderLayout.WEST);
-		
+		add(empTablePanel, BorderLayout.CENTER);
+
 		setMinimumSize(new Dimension(300, 400));
 		setSize(600, 500);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -77,26 +98,37 @@ public class MainFrame extends JFrame {
 		fileMenu.addSeparator();
 		fileMenu.add(exitItem);
 		menuBar.add(fileMenu);
-		
-		//import setup
+
+		// import setup
 		importDataItem.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent importEvent) {
-				if(fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
-					System.out.println(fileChooser.getSelectedFile());
-		}
+				if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
+					try {
+						controller.loadFromFile(fileChooser.getSelectedFile());
+						System.out.println(fileChooser.getSelectedFile());
+						empTablePanel.refresh();
+					} catch (IOException e) {
+						JOptionPane.showMessageDialog(MainFrame.this, "Failed to load from file", "File Error", JOptionPane.ERROR_MESSAGE);
+					}
+				}
 			}
 		});
-		
-		//export
+
+		// export setup
 		exportDataItem.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent importEvent) {
-				if(fileChooser.showSaveDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
-					System.out.println(fileChooser.getSelectedFile());
-		}
+				if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
+					try {
+						controller.saveToFile(fileChooser.getSelectedFile());
+						System.out.println(fileChooser.getSelectedFile());
+					} catch (IOException e) {
+						JOptionPane.showMessageDialog(MainFrame.this, "Failed to save to file", "File Error", JOptionPane.ERROR_MESSAGE);
+					}
+				}
 			}
 		});
 
@@ -123,11 +155,12 @@ public class MainFrame extends JFrame {
 		exitItem.setMnemonic(KeyEvent.VK_X);
 		exitItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, ActionEvent.CTRL_MASK));
 
+		importDataItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, ActionEvent.CTRL_MASK));
+
 		exitItem.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent exitEvent) {
-				
 
 				int action = JOptionPane.showConfirmDialog(MainFrame.this, "Are you sure?", "Confirm Exit",
 						JOptionPane.OK_CANCEL_OPTION);
