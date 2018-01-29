@@ -8,7 +8,7 @@ public class Employee implements Serializable {
 	 */
 	private static final long serialVersionUID = 6519599542967958217L;
 	
-	private static int totalEmployees = 0;
+	private static int totalEmployees = 1;
 	private int id;
 	private String firstName;
 	private String lastName;
@@ -30,6 +30,14 @@ public class Employee implements Serializable {
 		this.gender = gender;
 		
 		this.id = totalEmployees;
+		totalEmployees++;
+	}
+	
+	public Employee(int id, String firstName, String lastName, AgeCategory ageCategory,
+			EmploymentType emptype, String taxId, boolean usCitizen,
+			Gender gender) {
+		this(firstName, lastName, ageCategory, emptype, taxId, usCitizen, gender);
+		this.id = id;
 		totalEmployees++;
 	}
 	
@@ -84,5 +92,11 @@ public class Employee implements Serializable {
 
 	public static int getTotalEmployees() {
 		return totalEmployees;
+	}
+	
+	@Override
+	public String toString() {
+		return "Employee Name: " + lastName + ", " + firstName + " ID: " + id;
+		
 	}
 }

@@ -3,6 +3,7 @@ package com.enere.simplePackage;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.prefs.Preferences;
 
 import javax.swing.*;
@@ -69,11 +70,29 @@ public class MainFrame extends JFrame {
 
 		setJMenuBar(createMenuBar());
 
-		toolbar.setStringListener(new StringListener() {
+		toolbar.setToolbarListener(new ToolbarListener() {
 
 			@Override
-			public void textEmitted(String text) {
-				textPanel.appendText("Waddup \n");
+			public void saveEvent() {
+				connect();
+				try {
+					controller.save();
+				} catch (SQLException e) {
+					JOptionPane.showMessageDialog(MainFrame.this, "Unable to save to database", "Database Connection Error", JOptionPane.ERROR_MESSAGE);
+				}
+			}
+
+			@Override
+			public void refreshEvent() {
+				connect();
+				try {
+					controller.load();
+				} catch (SQLException e) {
+					JOptionPane.showMessageDialog(MainFrame.this, "Unable to load from database", "Database Connection Error", JOptionPane.ERROR_MESSAGE);
+				}
+				
+				empTablePanel.refresh();
+				
 			}
 		});
 
@@ -105,6 +124,14 @@ public class MainFrame extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
 
+	}
+	
+	private void connect() {
+		try {
+			controller.connect();
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(MainFrame.this, "Unable to connect to database", "Database Connection Error", JOptionPane.ERROR_MESSAGE);
+		}
 	}
 
 	private JMenuBar createMenuBar() {
@@ -167,7 +194,6 @@ public class MainFrame extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				// TODO Auto-generated method stub
 				dialog.setVisible(true);
 			}	
 		});

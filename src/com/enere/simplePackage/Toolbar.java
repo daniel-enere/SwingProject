@@ -7,30 +7,36 @@ import java.awt.event.ActionListener;
 
 @SuppressWarnings("serial")
 public class Toolbar extends JPanel implements ActionListener {
-	private JButton someButton;
-	private JButton anotherButton;
-	private StringListener textListener;
+	private JButton saveToDatabaseButton;
+	private JButton refreshTableButton;
+	private ToolbarListener toolbarListener;
 	
 	public Toolbar() {
 		setBorder(BorderFactory.createEtchedBorder());
-		someButton = new JButton("Some Button");
-		anotherButton = new JButton("Another Button");
+		saveToDatabaseButton = new JButton("Save");
+		refreshTableButton = new JButton("Refresh Table");
 		
-		someButton.addActionListener(this);
-		anotherButton.addActionListener(this);
+		saveToDatabaseButton.addActionListener(this);
+		refreshTableButton.addActionListener(this);
 		setLayout(new FlowLayout(FlowLayout.LEFT));
-		add(someButton);
-		add(anotherButton);
+		add(saveToDatabaseButton);
+		add(refreshTableButton);
 	}
 	
-	public void setStringListener(StringListener toolbarListener) {
-		this.textListener = toolbarListener;
+	public void setToolbarListener(ToolbarListener toolbarListener) {
+		this.toolbarListener = toolbarListener;
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent event) {
-		if (textListener != null) {
-			textListener.textEmitted("Waddup");
+		JButton clicked = (JButton) event.getSource();
+		if (clicked == saveToDatabaseButton) {
+			if(toolbarListener != null)
+			toolbarListener.saveEvent();
+		} else if (clicked == refreshTableButton) {
+			if (toolbarListener != null) {
+				toolbarListener.refreshEvent();
+			}
 		}
 	}
 }

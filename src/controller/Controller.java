@@ -2,6 +2,7 @@ package controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 
 import com.enere.simplePackage.FormEvent;
@@ -17,6 +18,22 @@ public class Controller {
 	
 	public List<Employee> getEmployees() {
 		return db.getEmployee();
+	}
+	
+	public void connect() throws Exception {
+		db.connect();
+	}
+	
+	public void load() throws SQLException {
+		db.load();
+	}
+	
+	public void save() throws SQLException {
+		db.save();
+	}
+	
+	public void disconnect() {
+		db.disconnect();
 	}
 	
 	public void addEmployee(FormEvent event) {
