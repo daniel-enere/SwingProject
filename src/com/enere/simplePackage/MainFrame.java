@@ -3,6 +3,7 @@ package com.enere.simplePackage;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.util.prefs.Preferences;
 
 import javax.swing.*;
 
@@ -19,6 +20,8 @@ public class MainFrame extends JFrame {
 	private JFileChooser fileChooser;
 	private Controller controller;
 	private EmployeeTablePanel empTablePanel;
+	private PrefsDialog dialog;
+	private Preferences prefs;
 	// private MainMenuBar menuBar; will implement at a later date
 
 	public MainFrame() {
@@ -31,16 +34,35 @@ public class MainFrame extends JFrame {
 		formPanel = new FormPanel();
 		fileChooser = new JFileChooser();
 		empTablePanel = new EmployeeTablePanel();
+		dialog = new PrefsDialog(this);
+		
+		prefs = Preferences.userRoot().node("db");
 		// menuBar = new MainMenuBar();
 
 		controller = new Controller();
 		empTablePanel.setData(controller.getEmployees());
 		
+		//Employee Table listener set up
 		empTablePanel.setEmployeeTableListener(new EmployeeTableListener() {
 			public void rowDeleted(int row) {
 				controller.removeEmployee(row);
 			}
 		});
+		
+		//preferences Listener set up
+		dialog.setPrefsListener(new PrefsListener() {
+			@Override
+			public void preferencesSet(String user, String pass, int port) {
+			 prefs.put("user", user);
+			 prefs.put("pass", pass);
+			 prefs.putInt("port", port);
+			}
+			
+		});
+		String user = prefs.get("user", "");
+		String pass = prefs.get("pass", "");
+		Integer port = prefs.getInt("port", 3306);
+		dialog.setDefaults(user, pass, port);
 
 		// fileChooser setup
 		fileChooser.addChoosableFileFilter(new EmployeeFileFilter());
@@ -107,7 +129,6 @@ public class MainFrame extends JFrame {
 				if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
 					try {
 						controller.loadFromFile(fileChooser.getSelectedFile());
-						System.out.println(fileChooser.getSelectedFile());
 						empTablePanel.refresh();
 					} catch (IOException e) {
 						JOptionPane.showMessageDialog(MainFrame.this, "Failed to load from file", "File Error", JOptionPane.ERROR_MESSAGE);
@@ -124,7 +145,6 @@ public class MainFrame extends JFrame {
 				if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
 					try {
 						controller.saveToFile(fileChooser.getSelectedFile());
-						System.out.println(fileChooser.getSelectedFile());
 					} catch (IOException e) {
 						JOptionPane.showMessageDialog(MainFrame.this, "Failed to save to file", "File Error", JOptionPane.ERROR_MESSAGE);
 					}
@@ -142,6 +162,16 @@ public class MainFrame extends JFrame {
 		showFormItem.setSelected(true);
 		showMenu.add(showFormItem);
 		menuBar.add(windowMenu);
+		JMenuItem prefItem = new JMenuItem("Preferences...");
+		prefItem.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+				dialog.setVisible(true);
+			}	
+		});
+		windowMenu.add(prefItem);
 
 		showFormItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
@@ -150,13 +180,14 @@ public class MainFrame extends JFrame {
 				formPanel.setVisible(menuItem.isSelected());
 			}
 		});
-
+		
+		//Accelerators
 		fileMenu.setMnemonic(KeyEvent.VK_F);
 		exitItem.setMnemonic(KeyEvent.VK_X);
 		exitItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, ActionEvent.CTRL_MASK));
-
 		importDataItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, ActionEvent.CTRL_MASK));
-
+		prefItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.CTRL_MASK));
+		
 		exitItem.addActionListener(new ActionListener() {
 
 			@Override
